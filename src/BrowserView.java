@@ -61,6 +61,7 @@ public class BrowserView {
     private Button myBackButton;
     private Button myNextButton;
     private Button myHomeButton;
+    private Button myFavoritesButton;
     // favorites
     private ComboBox<String> myFavorites;
     // get strings from resource file
@@ -84,20 +85,21 @@ public class BrowserView {
         enableButtons();
         // create scene to hold UI
         myScene = new Scene(root, DEFAULT_SIZE.width, DEFAULT_SIZE.height);
-        //myScene.getStylesheets().add(DEFAULT_RESOURCE_PACKAGE + STYLESHEET);
+        myScene.getStylesheets().add(DEFAULT_RESOURCE_PACKAGE + STYLESHEET);
     }
 
     /**
      * Display given URL.
      */
     public void showPage (String url) {
-        URL valid = myModel.go(url);
-        if (valid != null) {
-            update(valid);
-        }
-        else {
-            showError("Could not load " + url);
-        }
+    	try {
+    		URL valid = myModel.go(url);
+    		update(valid);
+
+    	}
+    	catch (BrowserException e) {
+    		showError(e.getMessage());
+    	}
     }
 
     /**
@@ -138,12 +140,17 @@ public class BrowserView {
     private void home () {
         showPage(myModel.getHome().toString());
     }
+    
+    // change current URL to clicked ComboBox URL
+    private void favorite(String name) {
+    	showPage(myModel.getFavorite(name).toString());
+    }
 
     // change page to favorite choice
     private void showFavorite (String favorite) {
         showPage(myModel.getFavorite(favorite).toString());
         // reset favorites ComboBox so the same choice can be made again
-        myFavorites.setValue(null);
+        //myFavorites.setValue(null);
     }
 
     // update just the view to display given URL
@@ -155,7 +162,7 @@ public class BrowserView {
     }
 
     // prompt user for name of favorite to add to collection
-    private void addFavorite () {
+    private void addFavorite() {
         TextInputDialog input = new TextInputDialog("");
         input.setTitle(myResources.getString("FavoritePromptTitle"));
         input.setContentText(myResources.getString("FavoritePrompt"));
@@ -164,6 +171,7 @@ public class BrowserView {
         if (response.isPresent()) {
             myModel.addFavorite(response.get());
             myFavorites.getItems().add(response.get());
+            myFavorites.setVisibleRowCount(myFavorites.getItems().size());
         }
     }
 
@@ -214,6 +222,12 @@ public class BrowserView {
         myHomeButton = makeButton("HomeCommand", event -> home());
         result.getChildren().add(myHomeButton);
         // if user presses button or enter in text field, load/show the URL
+        myFavoritesButton = makeButton("AddFavoriteCommand", event -> addFavorite());
+        result.getChildren().add(myFavoritesButton);
+        // add a combobox
+        myFavorites = new ComboBox<String>();
+        myFavorites.setOnAction((e) -> showFavorite(myFavorites.getSelectionModel().getSelectedItem()));
+        result.getChildren().add(myFavorites);
         EventHandler<ActionEvent> showHandler = new ShowPage();
         result.getChildren().add(makeButton("GoCommand", showHandler));
         myURLDisplay = makeInputField(40, showHandler);
@@ -224,7 +238,7 @@ public class BrowserView {
     // make buttons for setting favorites/home URLs
     private Node makePreferencesPanel () {
         HBox result = new HBox();
-        myFavorites = new ComboBox<String>();
+        //myFavorites = new ComboBox<String>();
         // ADD REST OF CODE HERE
         result.getChildren().add(makeButton("SetHomeCommand", event -> {
             myModel.setHome();

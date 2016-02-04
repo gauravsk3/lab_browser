@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 
 /**
@@ -15,13 +16,16 @@ import java.util.Map;
 public class BrowserModel {
     // constants
     public static final String PROTOCOL_PREFIX = "http://";
+    public static final String DEFAULT_RESOURCE_PACKAGE = "resources/";
+    public static final String ERROR = "Error";
     // state
     private URL myHome;
     private URL myCurrentURL;
     private int myCurrentIndex;
     private List<URL> myHistory;
     private Map<String, URL> myFavorites;
-
+    // get strings from resource file
+    private ResourceBundle errorResources;
 
     /**
      * Creates an empty model.
@@ -32,16 +36,17 @@ public class BrowserModel {
         myCurrentIndex = -1;
         myHistory = new ArrayList<>();
         myFavorites = new HashMap<>();
+        errorResources = ResourceBundle.getBundle(DEFAULT_RESOURCE_PACKAGE + ERROR);
     }
 
     /**
      * Returns the first page in next history, null if next history is empty.
      */
     public URL next () {
-        if (hasNext()) {
-            myCurrentIndex++;
-            return myHistory.get(myCurrentIndex);
-        }
+		if (hasNext()) {
+			myCurrentIndex++;
+			return myHistory.get(myCurrentIndex);
+		}
         return null;
     }
 
@@ -76,7 +81,7 @@ public class BrowserModel {
             return myCurrentURL;
         }
         catch (Exception e) {
-            return null;
+            throw new BrowserException(String.format(errorResources.getString("InvalidURL"), url.toString()));
         }
     }
 

@@ -6,6 +6,9 @@ import javafx.stage.Stage;
  * A simple HTML browser.
  * 
  * @author Robert C. Duvall
+ * 
+ * @authors Hunter Lee (hl130), Gaurav Kumar (gsk6)
+ * 
  */
 public class Main extends Application {
     // convenience constants
