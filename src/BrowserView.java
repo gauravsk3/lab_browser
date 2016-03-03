@@ -30,6 +30,9 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 
 /**
  * A class used to display the viewer for a simple HTML browser.
@@ -263,6 +266,23 @@ public class BrowserView {
         }
         result.setOnAction(handler);
         return result;
+    }
+    
+    private Button makeButton(String property, String methodName) 
+    		throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
+    	 final String IMAGEFILE_SUFFIXES = 
+    	            String.format(".*\\.(%s)", String.join("|", ImageIO.getReaderFileSuffixes()));
+    	 Button result = new Button();
+    	 String label = myResources.getString(property);
+    	 if (label.matches(IMAGEFILE_SUFFIXES)) {
+    		 result.setGraphic(new ImageView(
+    				 new Image(getClass().getResourceAsStream(DEFAULT_RESOURCE_PACKAGE + label))));
+    	 } else
+    		 result.setText(label);
+    	 Object obj = new Object();
+    	 Method method = obj.getClass().getMethod(methodName);
+    	 result.setOnAction(event -> method.invoke(obj));
+    	 return result;
     }
 
     // make text field for input
